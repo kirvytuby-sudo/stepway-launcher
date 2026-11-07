@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -16,8 +16,18 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
-      - run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-      - run: gradle :app:assembleRelease --no-daemon
+      - name: Revisar SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "::notice::SDK en $SDK -> $(ls $SDK/platforms 2>&1 | tr '\n' ' ')"
+          echo "sdk.dir=$SDK" > local.properties
+      - name: Compilar
+        run: |
+          set -o pipefail
+          gradle :app:assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log || {
+            grep -E "error|Error|wrong|FAILED|Could not|e: " build.log | head -25 | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1; }
       - run: cp app/build/outputs/apk/release/app-release.apk StepwayLauncher.apk
       - uses: actions/upload-artifact@v4
         with:
