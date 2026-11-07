@@ -1,7 +1,7 @@
 # Stepway Launcher
 
 Pantalla de inicio para el radio Android (1024x600) de la Renault Stepway 2015:
-saludo con nombre, Stepway naranja, reloj, clima en vivo, navegación, música,
+saludo con nombre, Stepway, reloj, clima en vivo, velocímetro por GPS, música,
 teléfono, radio FM, Android Auto y Apple CarPlay.
 
 ![vista previa](vista_previa.png)
@@ -42,6 +42,13 @@ Alternativa: abre la carpeta en Android Studio y usa Build > Build APK.
   en PNG sin fondo; puedes quitarle el fondo gratis en remove.bg).
   "Volver al dibujo" regresa la Stepway dibujada.
 - Botón de cuadritos: todas las apps. Engrane: ajustes de Android.
+
+## Velocímetro
+- Usa el GPS del radio: muestra la velocidad en km/h, la máxima y los km recorridos.
+- Deja presionado el velocímetro 1 segundo para reiniciar el recorrido.
+- Acepta el permiso de "ubicación precisa" la primera vez.
+- La velocidad del GPS puede variar ±2-3 km/h respecto al tablero; es normal.
+- Navegación (Waze/Maps) sigue en la flecha de la barra izquierda.
 
 ## Personalizar
 - Colores disponibles: lista `COLORES` en `app/src/main/assets/launcher/index.html`.

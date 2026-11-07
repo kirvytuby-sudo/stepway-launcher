@@ -45,8 +45,8 @@ class MainActivity : Activity() {
         setContentView(web)
         ocultarBarras()
 
-        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 1)
         }
     }
 
@@ -57,7 +57,51 @@ class MainActivity : Activity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
     }
 
-    override fun onResume() { super.onResume(); ocultarBarras() }
+    override fun onResume() { super.onResume(); ocultarBarras(); iniciarGps() }
+    override fun onPause() { super.onPause(); detenerGps() }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        iniciarGps()
+    }
+
+    // ===== Velocidad por GPS =====
+    private var ultima: android.location.Location? = null
+    private val escuchaGps = object : android.location.LocationListener {
+        override fun onLocationChanged(l: android.location.Location) {
+            var ms = if (l.hasSpeed()) l.speed.toDouble() else 0.0
+            val prev = ultima
+            if (!l.hasSpeed() && prev != null) {
+                val dt = (l.time - prev.time) / 1000.0
+                if (dt > 0) ms = l.distanceTo(prev) / dt
+            }
+            ultima = l
+            val kmh = ms * 3.6
+            val acc = if (l.hasAccuracy()) l.accuracy.toDouble() else 0.0
+            web.evaluateJavascript("window.onSpeed && window.onSpeed($kmh,$acc)", null)
+        }
+        @Deprecated("Deprecated in Java")
+        override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
+        override fun onProviderEnabled(p: String) {}
+        override fun onProviderDisabled(p: String) {
+            web.evaluateJavascript("window.onGps && window.onGps('Apagado')", null)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun iniciarGps() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return
+        val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        try {
+            if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER))
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500L, 0f, escuchaGps)
+            else web.evaluateJavascript("window.onGps && window.onGps('Apagado')", null)
+        } catch (_: Exception) {}
+    }
+
+    private fun detenerGps() {
+        try { (getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(escuchaGps) } catch (_: Exception) {}
+    }
 
     // Un launcher no se cierra con "atrás": solo cierra el cajón de apps.
     @Deprecated("Deprecated in Java")
@@ -137,7 +181,8 @@ class MainActivity : Activity() {
         @SuppressLint("MissingPermission")
         @JavascriptInterface
         fun getLocation(): String {
-            if (ctx.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) return "{}"
+            if (ctx.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ctx.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return "{}"
             val lm = ctx.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             for (p in lm.getProviders(true)) {
                 val l = try { lm.getLastKnownLocation(p) } catch (_: Exception) { null } ?: continue

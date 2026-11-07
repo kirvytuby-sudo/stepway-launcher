@@ -103,6 +103,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Rob
 .ctr svg{width:2.8vh;fill:#fff}
 .ctr .p svg{fill:var(--c3);width:3.4vh}
 
+
+/* ===== Velocímetro ===== */
+.speedo{display:flex;flex-direction:column;align-items:center;padding:1vh 1vw 1.4vh}
+.gauge{width:100%;height:0;flex:1 1 0;min-height:0;overflow:visible;margin-top:1vh}
+.gauge .track{fill:none;stroke:rgba(255,255,255,.14);stroke-width:12;stroke-linecap:round}
+.gauge .arc{fill:none;stroke-width:12;stroke-linecap:round;stroke-dasharray:0 100;transition:stroke-dasharray .5s ease-out;filter:drop-shadow(0 0 6px var(--c1))}
+.gauge text{fill:#d6e6ff;font-size:9px;font-family:Roboto,Arial,sans-serif;text-anchor:middle;dominant-baseline:middle}
+.gauge .tick{stroke:rgba(255,255,255,.55);stroke-width:2}
+.needle{transform-origin:100px 100px;transition:transform .5s ease-out}
+.sp-read{position:absolute;top:34%;left:0;right:0;text-align:center;pointer-events:none}
+.sp-num{font-size:9vh;font-weight:900;line-height:1;text-shadow:0 0 2vh var(--c1)}
+.sp-unit{font-size:2vh;color:var(--sub);letter-spacing:.2em}
+.sp-foot{display:flex;justify-content:space-around;width:100%;font-size:1.6vh;color:var(--sub)}
+.sp-foot div{display:flex;flex-direction:column;align-items:center}
+.sp-foot i{font-style:normal}
+.sp-foot b{font-size:2.3vh;color:#fff}
+.sp-foot small{font-size:1.4vh}
+.speedo.fast .sp-num{color:#ff6b6b;text-shadow:0 0 2vh #ff3b3b}
+
 /* ===== Derecha ===== */
 .quick{display:grid;grid-template-rows:repeat(4,1fr);gap:1.1vh;min-height:0}
 .q{display:flex;align-items:center;gap:1vw;padding:0 1.1vw}
@@ -289,16 +308,24 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Rob
       </article>
 
       <div class="mid">
-        <article class="card glass map" data-tile="nav">
-          <svg class="mapbg" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice">
-            <g stroke="rgba(255,255,255,.18)" stroke-width="6" fill="none"><path d="M0 40h300M0 115h300M60 0v160M170 0v160M250 0v160"/></g>
-            <g stroke="rgba(255,255,255,.1)" stroke-width="3" fill="none"><path d="M0 80h300M110 0v160M210 0v160M0 0l300 160"/></g>
-            <path d="M0 62h300" stroke="rgba(255,255,255,.55)" stroke-width="8"/>
-            <path d="M60 160 C90 120 150 110 170 62 S240 20 300 10" stroke="var(--c1)" stroke-width="5" fill="none"/>
-            <circle cx="170" cy="62" r="7" fill="var(--c1)" stroke="#fff" stroke-width="3"/>
-            <g fill="#ff5c8a"><circle cx="40" cy="58" r="4"/><circle cx="235" cy="60" r="4"/><circle cx="120" cy="25" r="4"/></g>
+        <article class="card glass speedo" id="speedo">
+          <svg class="gauge" viewBox="-4 2 208 150">
+            <defs>
+              <linearGradient id="gArc" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#2ee6c0"/><stop offset=".55" stop-color="var(--c1)"/><stop offset="1" stop-color="#ff3b3b"/>
+              </linearGradient>
+            </defs>
+            <path class="track" d="M36.4 143.6 A90 90 0 1 1 163.6 143.6" pathLength="100"/>
+            <path class="arc" id="gArcPath" d="M36.4 143.6 A90 90 0 1 1 163.6 143.6" pathLength="100" stroke="url(#gArc)"/>
+            <g id="ticks"></g>
+            <g id="needle" class="needle"><path d="M100 62 L100 24" stroke="#fff" stroke-width="4" stroke-linecap="round"/></g>
           </svg>
-          <div class="lbl"><div class="c"><svg viewBox="0 0 24 24"><path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z"/></svg></div><div><b>Navegación</b><span>¿A dónde vamos?</span></div></div>
+          <div class="sp-read"><div class="sp-num" id="spNum">0</div><div class="sp-unit">km/h</div></div>
+          <div class="sp-foot">
+            <div><i>Máx</i><b id="spMax">0</b></div>
+            <div><i>Recorrido</i><b id="spDist">0.0</b><small>km</small></div>
+            <div><i>GPS</i><b id="spGps">…</b></div>
+          </div>
         </article>
         <article class="card glass music">
           <div class="cover" data-tile="music"><div class="eq"><i></i><i></i><i></i><i></i></div><svg viewBox="0 0 24 24"><path d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3z"/></svg></div>
@@ -443,6 +470,39 @@ async function clima(){
   }catch(e){$("wxDesc").textContent="Sin internet";$("wxFeel").textContent="Conecta el hotspot"}
 }
 clima();setInterval(clima,20*60*1000);
+
+
+// ===== Velocímetro (GPS) =====
+const VMAX=180;
+(function(){ // marcas cada 20 km/h
+  let g="";for(let v=0;v<=VMAX;v+=20){const a=(-135+270*v/VMAX)*Math.PI/180;
+    const x1=100+80*Math.sin(a),y1=100-80*Math.cos(a),x2=100+72*Math.sin(a),y2=100-72*Math.cos(a),tx=100+60*Math.sin(a),ty=100-60*Math.cos(a);
+    g+=`<line class="tick" x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"/><text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}">${v}</text>`}
+  $("ticks").innerHTML=g;
+})();
+let vMax=0,dist=parseFloat(store.get("trip")||"0")||0,lastT=0;
+function velocidad(kmh,precision){
+  kmh=Math.max(0,Math.min(VMAX,Math.round(kmh)));
+  $("spNum").textContent=kmh;
+  $("gArcPath").style.strokeDasharray=(kmh/VMAX*100)+" 100";
+  $("needle").style.transform=`rotate(${-135+270*kmh/VMAX}deg)`;
+  $("speedo").classList.toggle("fast",kmh>=110);
+  const now=Date.now();
+  if(lastT&&kmh>0){dist+=kmh*(now-lastT)/3600000;$("spDist").textContent=dist.toFixed(1);store.set("trip",dist.toFixed(3))}
+  lastT=now;
+  if(kmh>vMax){vMax=kmh;$("spMax").textContent=vMax}
+  $("spGps").textContent=precision?("±"+Math.round(precision)+"m"):"OK";
+}
+window.onSpeed=velocidad;
+window.onGps=t=>{$("spGps").textContent=t};
+$("spDist").textContent=dist.toFixed(1);
+// toque largo en el velocímetro = reiniciar recorrido
+(function(){let t;const el=$("speedo");
+  el.addEventListener("touchstart",()=>{t=setTimeout(()=>{dist=0;vMax=0;store.set("trip","0");$("spDist").textContent="0.0";$("spMax").textContent="0";toast("Recorrido reiniciado")},900)},{passive:true});
+  el.addEventListener("touchend",()=>clearTimeout(t));})();
+if(!A){ // vista previa: simula manejo
+  let v=0,d=1;setInterval(()=>{v+=d*7;if(v>95||v<0)d*=-1;velocidad(Math.max(0,v),5)},700);
+}
 
 // ===== Abrir apps =====
 function abrir(tile){
