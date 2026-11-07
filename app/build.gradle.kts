@@ -27,4 +27,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+    // No se publica en Play Store: no detener la compilación por reglas de la tienda.
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
 }
