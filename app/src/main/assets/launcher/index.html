@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Stepway Launcher</title>
+<style>
+:root{
+  --line:rgba(255,255,255,.22); --txt:#fff; --sub:#d6e6ff; --acc:#ffb547;
+  --glass:rgba(8,24,70,.42); --glass2:rgba(8,24,70,.58);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Roboto,"Segoe UI",Arial,sans-serif;color:var(--txt)}
+
+/* ===== Fondo ===== */
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+#bgImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#bgScene{position:absolute;inset:0;width:100%;height:100%}
+#bgShade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,20,.35),rgba(0,0,20,.1) 40%,rgba(0,0,20,.25))}
+.wave{animation:ola 9s linear infinite}
+.wave.w2{animation-duration:14s;animation-direction:reverse}
+.wave.w3{animation-duration:20s}
+@keyframes ola{from{transform:translateX(0)}to{transform:translateX(-400px)}}
+.cloud{animation:nube 60s linear infinite}
+.cloud.c2{animation-duration:90s}
+@keyframes nube{from{transform:translateX(-300px)}to{transform:translateX(1400px)}}
+.gull{animation:vuelo 6s ease-in-out infinite}
+@keyframes vuelo{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.sunglow{animation:brillo 5s ease-in-out infinite}
+@keyframes brillo{0%,100%{opacity:.55}50%{opacity:.9}}
+
+.app{position:absolute;inset:0;display:grid;grid-template-columns:7.2vw 1fr;z-index:1}
+.glass{background:var(--glass);border:1px solid var(--line);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+
+/* ===== Barra lateral ===== */
+.side{display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:3vh 0;background:rgba(0,8,40,.45);border-right:1px solid var(--line);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.side button{width:5vw;height:5vw;border:0;border-radius:1.4vw;background:transparent;display:grid;place-items:center}
+.side button.on{background:linear-gradient(135deg,var(--c1),var(--c3))}
+.side svg{width:2.5vw;height:2.5vw;fill:#fff}
+
+.main{display:grid;grid-template-rows:8.5vh 1fr;padding:1.4vh 1.6vw 2.2vh 1.4vw;gap:1.4vh;min-width:0}
+.top{display:flex;align-items:center;gap:1.2vw;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.top .clock{font-size:4.6vh;font-weight:800}
+.top .date{font-size:2.4vh;color:var(--sub)}
+.top .sp{flex:1}
+.top .ico{display:flex;gap:1vw;align-items:center;font-size:2.4vh;padding:.8vh 1.2vw;border-radius:3vh}
+.top .ico svg{width:2.6vh;height:2.6vh;fill:#fff}
+
+.grid{display:grid;grid-template-columns:1.3fr 1fr .78fr;gap:1.3vw;min-height:0}
+.card{border-radius:2.4vh;position:relative;overflow:hidden;box-shadow:0 1vh 3vh rgba(0,0,30,.35)}
+.card:active{transform:scale(.985)}
+
+/* ===== Tarjeta del carro ===== */
+.carcard{padding:2.4vh 1.8vw 2vh;display:flex;flex-direction:column}
+.hola{font-size:4.4vh;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+.hola2{font-size:2.1vh;color:var(--sub);margin-top:.3vh}
+.badge{position:absolute;top:2.2vh;right:1.4vw;font-size:1.6vh;letter-spacing:.2em;padding:.7vh 1vw;border-radius:2vh;background:linear-gradient(135deg,var(--c1),var(--c3));font-weight:700}
+.carstage{flex:1;position:relative;min-height:0;display:grid;place-items:center}
+.bigname{position:absolute;top:8%;left:0;right:0;text-align:center;font-size:11vh;font-weight:900;font-style:italic;letter-spacing:.04em;color:transparent;-webkit-text-stroke:2px rgba(255,255,255,.28);line-height:1}
+.road{position:absolute;left:-2vw;right:-2vw;bottom:6%;height:.5vh;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)}
+.speed{position:absolute;left:0;top:45%;width:30%;height:30%;opacity:0}
+.speed i{display:block;height:.4vh;margin:1.6vh 0;border-radius:1vh;background:linear-gradient(90deg,transparent,rgba(255,255,255,.8))}
+.carstage.go .speed{animation:vel .9s ease-out}
+@keyframes vel{0%{opacity:0;transform:translateX(40%)}30%{opacity:1}100%{opacity:0;transform:translateX(-30%)}}
+#car{width:104%;max-height:31vh;position:relative;z-index:2;filter:drop-shadow(0 1.2vh 1.2vh rgba(0,0,0,.45))}
+.carstage.go #car{animation:arranque .9s cubic-bezier(.3,.7,.2,1)}
+@keyframes arranque{0%{transform:translateX(0)}25%{transform:translateX(-2%) rotate(-1deg)}60%{transform:translateX(4%)}100%{transform:translateX(0)}}
+.carstage.go .rimspin{animation:gira .9s linear}
+@keyframes gira{to{transform:rotate(720deg)}}
+.rimspin{transform-box:fill-box;transform-origin:center}
+.colors{display:flex;gap:.8vw;justify-content:center;margin:.4vh 0 1vh}
+.colors button{width:3.6vh;height:3.6vh;border-radius:50%;border:2px solid rgba(255,255,255,.5);cursor:pointer}
+.colors button.sel{border:3px solid #fff;box-shadow:0 0 0 3px rgba(255,255,255,.25);transform:scale(1.15)}
+.wxbox{display:flex;align-items:center;gap:1vw;padding:1.2vh 1.2vw;border-radius:1.8vh;background:rgba(0,0,0,.22)}
+.wx .t{font-size:5.4vh;font-weight:800}
+.wxd{font-size:2vh;line-height:1.35;flex:1}
+.wxd b{display:block;font-weight:600}
+.wxd span{color:var(--sub)}
+.wxs{display:grid;grid-template-columns:auto auto;gap:.3vh 1vw;font-size:1.8vh;color:var(--sub)}
+
+/* ===== Centro ===== */
+.mid{display:grid;grid-template-rows:1fr 1fr;gap:1.3vw;min-height:0}
+.map svg.mapbg{position:absolute;inset:0;width:100%;height:100%;opacity:.85}
+.map .lbl{position:absolute;left:1.2vw;bottom:1.8vh;display:flex;align-items:center;gap:.8vw}
+.map .lbl .c{width:5.4vh;height:5.4vh;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c3));display:grid;place-items:center}
+.map .lbl .c svg{width:2.6vh;fill:#fff}
+.map .lbl b{font-size:2.3vh;display:block}
+.map .lbl span{font-size:1.7vh;color:var(--sub)}
+.music{padding:1.8vh 1.3vw;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto 1fr auto auto;column-gap:1.1vw}
+.cover{grid-row:1/3;width:11vh;height:11vh;border-radius:1.6vh;background:linear-gradient(140deg,var(--c1),var(--c3));display:grid;place-items:center;position:relative;overflow:hidden}
+.cover svg{width:4.6vh;fill:#fff;position:relative}
+.eq{position:absolute;bottom:1vh;left:1vh;right:1vh;display:flex;gap:.4vh;align-items:flex-end;height:3vh;opacity:.5}
+.eq i{flex:1;background:#fff;border-radius:.3vh;animation:eq 1s ease-in-out infinite}
+.eq i:nth-child(2){animation-delay:.2s}.eq i:nth-child(3){animation-delay:.4s}.eq i:nth-child(4){animation-delay:.1s}
+@keyframes eq{0%,100%{height:20%}50%{height:100%}}
+.song b{font-size:2.3vh;display:block;margin-top:.6vh}
+.song span{font-size:1.7vh;color:var(--sub)}
+.bar{grid-column:1/3;height:.6vh;border-radius:1vh;background:rgba(255,255,255,.25);margin-top:1.2vh;position:relative}
+.bar::after{content:"";position:absolute;left:0;top:0;bottom:0;width:35%;border-radius:1vh;background:linear-gradient(90deg,var(--c1),var(--c3))}
+.ctr{grid-column:1/3;display:flex;justify-content:space-around;align-items:center;margin-top:1vh}
+.ctr button{width:6.4vh;height:6.4vh;border-radius:50%;border:0;background:rgba(255,255,255,.18);display:grid;place-items:center}
+.ctr button.p{width:8.4vh;height:8.4vh;background:#fff}
+.ctr svg{width:2.8vh;fill:#fff}
+.ctr .p svg{fill:var(--c3);width:3.4vh}
+
+/* ===== Derecha ===== */
+.quick{display:grid;grid-template-rows:repeat(4,1fr);gap:1.1vh;min-height:0}
+.q{display:flex;align-items:center;gap:1vw;padding:0 1.1vw}
+.q .qi{width:6.2vh;height:6.2vh;border-radius:1.6vh;display:grid;place-items:center;flex:none;box-shadow:0 .6vh 1.4vh rgba(0,0,0,.3)}
+.q .qi svg{width:3.3vh;fill:#fff}
+.q b{font-size:2.2vh;display:block}
+.q span{font-size:1.6vh;color:var(--sub)}
+
+/* ===== Cajón / menús ===== */
+.drawer{position:fixed;inset:0;background:rgba(3,10,40,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;flex-direction:column;padding:3vh 3vw;z-index:9}
+.drawer.on{display:flex}
+.drawer h2{font-size:3.4vh;margin-bottom:2vh;display:flex;justify-content:space-between;align-items:center}
+.drawer h2 button,.opt{border:0;background:rgba(255,255,255,.15);color:#fff;font-size:2.4vh;padding:1.2vh 2vw;border-radius:1.2vh}
+.apps{display:grid;grid-template-columns:repeat(8,1fr);gap:2.4vh 1vw;overflow-y:auto;padding-bottom:4vh}
+.app1{display:flex;flex-direction:column;align-items:center;gap:.8vh;text-align:center;font-size:1.8vh}
+.app1 img,.app1 .ph{width:9vh;height:9vh;border-radius:2vh}
+.app1 .ph{background:rgba(255,255,255,.15)}
+.opts{display:flex;flex-direction:column;gap:2vh;max-width:60vw}
+.opt{text-align:left;padding:2.2vh 2vw;font-size:2.6vh}
+.toast{position:fixed;left:50%;bottom:4vh;transform:translateX(-50%);background:rgba(0,0,0,.8);padding:1.4vh 2.4vw;border-radius:3vh;font-size:2.2vh;opacity:0;transition:opacity .3s;z-index:10}
+.toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ===== FONDO: escena original animada (mar al atardecer) o imagen elegida por el usuario ===== -->
+<div id="bg">
+  <svg id="bgScene" viewBox="0 0 1024 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1b2a7a"/><stop offset=".45" stop-color="#6b3fa0"/><stop offset=".7" stop-color="#f06a5a"/><stop offset=".86" stop-color="#ffb547"/>
+      </linearGradient>
+      <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1f5fbf"/><stop offset="1" stop-color="#071a52"/>
+      </linearGradient>
+      <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#fff6c9"/><stop offset=".5" stop-color="#ffd166"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1024" height="600" fill="url(#sky)"/>
+    <circle class="sunglow" cx="760" cy="350" r="190" fill="url(#sun)"/>
+    <circle cx="760" cy="350" r="62" fill="#fff1b8"/>
+    <g fill="#fff" opacity=".85">
+      <g class="cloud"><ellipse cx="120" cy="120" rx="80" ry="22"/><ellipse cx="160" cy="105" rx="50" ry="24"/></g>
+      <g class="cloud c2" opacity=".6"><ellipse cx="420" cy="70" rx="110" ry="20"/><ellipse cx="470" cy="56" rx="60" ry="22"/></g>
+      <g class="cloud" opacity=".5" style="animation-delay:-30s"><ellipse cx="300" cy="190" rx="70" ry="14"/></g>
+    </g>
+    <g class="gull" fill="none" stroke="#1b1b3a" stroke-width="3" stroke-linecap="round">
+      <path d="M560 160 q12 -10 24 0 q12 -10 24 0"/><path d="M620 200 q8 -7 16 0 q8 -7 16 0"/><path d="M520 215 q7 -6 14 0 q7 -6 14 0"/>
+    </g>
+    <!-- islas -->
+    <path d="M0 372 C60 330 140 320 210 352 C250 340 300 345 330 372 Z" fill="#2a1a55"/>
+    <path d="M880 372 C910 340 960 330 1024 345 L1024 372 Z" fill="#2a1a55"/>
+    <!-- velero original -->
+    <g transform="translate(470 300)">
+      <path d="M0 70 L90 70 L78 86 L12 86 Z" fill="#3a1f3f"/>
+      <path d="M44 0 L44 70" stroke="#3a1f3f" stroke-width="3"/>
+      <path d="M46 6 C80 22 86 50 84 66 L48 66 Z" fill="#ffe2b8"/>
+      <path d="M42 14 C18 28 12 50 14 66 L42 66 Z" fill="#ffd39a"/>
+    </g>
+    <rect y="370" width="1024" height="230" fill="url(#sea)"/>
+    <path d="M660 372 h200 l-30 6 h-140 z M690 390 h140 l-20 4 h-100z M720 410 h80 l-12 3 h-56z" fill="#ffe08a" opacity=".55"/>
+    <g class="wave"><path d="M0 420 q50 -14 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 V600 H0Z" fill="#2b6fd6" opacity=".55"/></g>
+    <g class="wave w2"><path d="M0 470 q50 -16 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 V600 H0Z" fill="#164aa8" opacity=".75"/></g>
+    <g class="wave w3"><path d="M0 530 q50 -18 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 V600 H0Z" fill="#0b2d78"/></g>
+  </svg>
+  <img id="bgImg" alt="">
+  <div id="bgShade"></div>
+</div>
+
+<div class="app">
+  <nav class="side">
+    <button class="on" data-act="home" aria-label="Inicio"><svg viewBox="0 0 24 24"><path d="M12 3 2 11h3v9h5v-6h4v6h5v-9h3z"/></svg></button>
+    <button data-tile="nav" aria-label="Navegación"><svg viewBox="0 0 24 24"><path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z"/></svg></button>
+    <button data-tile="phone" aria-label="Teléfono"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></button>
+    <button data-tile="music" aria-label="Música"><svg viewBox="0 0 24 24"><path d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3z"/></svg></button>
+    <button data-act="apps" aria-label="Apps"><svg viewBox="0 0 24 24"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z"/></svg></button>
+    <button data-act="fondo" aria-label="Fondo"><svg viewBox="0 0 24 24"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5z"/></svg></button>
+    <button data-act="settings" aria-label="Ajustes"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7 7 0 0 0-1.7-1L15 3h-4l-.4 2.7a7 7 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7 7 0 0 0 1.7 1L11 21h4l.4-2.7a7 7 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg></button>
+  </nav>
+
+  <main class="main">
+    <header class="top">
+      <div class="clock" id="clock">--:--</div>
+      <div class="date" id="date"></div>
+      <div class="sp"></div>
+      <div class="ico glass">
+        <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="m17.7 7.7-5.7-5.7H11v7.6L6.4 5 5 6.4l5.6 5.6L5 17.6 6.4 19l4.6-4.6V22h1l5.7-5.7-4.3-4.3zM13 5.8l1.9 1.9L13 9.6zm1.9 10.5L13 18.2v-3.8z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M12 3C7.8 3 4 4.6 1 7.3L12 21 23 7.3A16.4 16.4 0 0 0 12 3z"/></svg>
+        <span id="extTemp">--°C</span>
+      </div>
+    </header>
+
+    <section class="grid">
+      <article class="card glass carcard">
+        <div class="hola" id="hola">Hola, Kirvy</div>
+        <div class="hola2" id="saludo">Bienvenido</div>
+        <div class="badge">SANDERO STEPWAY · 2015</div>
+
+        <div class="carstage" id="stage">
+          <div class="bigname">STEPWAY</div>
+          <div class="road"></div>
+          <div class="speed"><i></i><i style="width:70%"></i><i style="width:85%"></i></div>
+          <!-- Ilustración original de una Sandero Stepway 2015: hatchback elevado, barras de techo,
+               molduras negras en salpicaderas, estribos con protector plata y faros de niebla -->
+          <img id="carFoto" alt="" style="display:none;position:relative;z-index:2;max-width:100%;max-height:31vh;object-fit:contain;filter:drop-shadow(0 1.2vh 1.2vh rgba(0,0,0,.45))">
+          <svg id="car" viewBox="18 30 570 215" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+                <stop id="s1" offset="0"/><stop id="s2" offset=".55"/><stop id="s3" offset="1"/>
+              </linearGradient>
+              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#bfe1ff"/><stop offset=".45" stop-color="#2d5a96"/><stop offset="1" stop-color="#0b1730"/>
+              </linearGradient>
+              <radialGradient id="rim" cx=".5" cy=".5" r=".5">
+                <stop offset="0" stop-color="#f3f6fa"/><stop offset=".7" stop-color="#a7b1bf"/><stop offset="1" stop-color="#5b6573"/>
+              </radialGradient>
+              <radialGradient id="shadow" cx=".5" cy=".5" r=".5">
+                <stop offset="0" stop-color="#000" stop-opacity=".6"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <ellipse cx="300" cy="230" rx="275" ry="18" fill="url(#shadow)"/>
+            <!-- barras de techo -->
+            <path d="M198 50 L412 44 L422 51 L194 57 Z" fill="#d4dae1"/>
+            <rect x="214" y="46" width="9" height="11" rx="2" fill="#2a3038"/><rect x="398" y="42" width="9" height="11" rx="2" fill="#2a3038"/>
+            <!-- carrocería (perfil hatchback alto) -->
+            <path d="M40 150 C42 126 58 114 90 108 L168 96 C188 76 212 60 236 56 L400 52 C434 54 456 70 474 96 L522 104 C550 110 562 124 564 146 L566 176 C566 186 558 192 548 192 L52 192 C42 192 36 186 36 176 Z" fill="url(#body)"/>
+            <!-- línea de carácter -->
+            <path d="M60 132 C200 122 420 120 552 128" stroke="#000" stroke-opacity=".18" stroke-width="3" fill="none"/>
+            <!-- ventanas -->
+            <path d="M184 100 C200 80 218 69 240 66 L300 64 L300 102 Z" fill="url(#glass)"/>
+            <path d="M310 64 L394 61 C420 62 438 74 456 98 L310 102 Z" fill="url(#glass)"/>
+            <path d="M96 106 C108 84 130 70 160 66 L176 66 C166 80 160 92 158 104 Z" fill="url(#glass)" opacity=".9"/>
+            <path d="M300 62 h10 v44 h-10z M160 66 h18 v40 h-18z" fill="#141a22"/>
+            <!-- puertas y manijas -->
+            <path d="M300 108 L298 186 M180 108 C176 140 176 166 180 188 M454 102 C458 132 458 160 454 186" stroke="#000" stroke-opacity=".3" stroke-width="2" fill="none"/>
+            <rect x="248" y="118" width="26" height="5" rx="2.5" fill="#000" opacity=".45"/><rect x="394" y="116" width="26" height="5" rx="2.5" fill="#000" opacity=".45"/>
+            <!-- espejo -->
+            <path d="M462 100 l16 2 c6 1 6 12 0 12 l-18 -2 z" fill="#1d232b"/>
+            <!-- molduras negras -->
+            <path d="M36 168 L128 166 C116 150 92 144 74 150 C56 156 46 164 36 174 Z" fill="#1c2026"/>
+            <path d="M566 162 L470 164 C482 148 508 142 528 148 C546 154 558 162 566 170 Z" fill="#1c2026"/>
+            <path d="M150 178 L452 178 L448 196 L154 196 Z" fill="#1c2026"/>
+            <path d="M162 186 L440 186" stroke="#b7c0ca" stroke-width="3"/>
+            
+            <!-- franja decorativa en puertas -->
+            <path d="M190 160 L450 156 L452 174 L188 176 Z" fill="#1c2026" opacity=".9"/>
+            <path d="M200 166 l12 -4 l8 6 l14 -5 l10 5 l16 -6 l12 5 l20 -4 l14 6 l18 -6 l12 4 l22 -5 l16 6 l20 -6 l14 4 l18 -4 l14 5" stroke="#3a414b" stroke-width="2" fill="none"/>
+            <text x="440" y="152" text-anchor="end" font-family="Arial,sans-serif" font-weight="900" font-style="italic" font-size="9" fill="#d8c64a">STEPWAY</text>
+            <!-- arcos de rueda -->
+            <path d="M50 196 C50 140 90 114 126 114 C162 114 200 140 200 196 Z" fill="#1c2026"/>
+            <path d="M400 196 C400 140 440 114 476 114 C512 114 552 140 552 196 Z" fill="#1c2026"/>
+            <!-- calaveras (izq) y faros (der) -->
+            <path d="M42 116 L70 110 C74 120 74 132 70 140 L40 146 C38 136 38 126 42 116 Z" fill="#d81f26"/>
+            <path d="M44 122 L66 118" stroke="#ff8a8a" stroke-width="2"/>
+            <path d="M534 110 L560 118 C564 126 564 134 562 142 L538 136 C532 128 530 120 534 110 Z" fill="#f4f8ff"/>
+            <circle cx="550" cy="126" r="5" fill="#fff9d6"/>
+            <!-- faro de niebla y protector -->
+            <circle cx="552" cy="164" r="5" fill="#fffbe0" stroke="#1c2026" stroke-width="2"/>
+            <path d="M540 176 L568 174 L566 190 L542 192 Z" fill="#c4ccd5"/>
+            <path d="M34 176 L58 176 L58 192 L36 192 Z" fill="#c4ccd5"/>
+            <!-- ruedas -->
+            <g><circle cx="125" cy="192" r="44" fill="#0d1015"/><circle cx="125" cy="192" r="40" fill="none" stroke="#23282f" stroke-width="3"/>
+              <g class="rimspin"><circle cx="125" cy="192" r="28" fill="#2a3038"/><circle cx="125" cy="192" r="26" fill="none" stroke="url(#rim)" stroke-width="4"/>
+              <g stroke="url(#rim)" stroke-width="9" stroke-linecap="round"><path d="M125 192 L125.0 167.0 M125 192 L148.8 184.3 M125 192 L139.7 212.2 M125 192 L110.3 212.2 M125 192 L101.2 184.3"/></g><circle cx="125" cy="192" r="9" fill="url(#rim)"/></g>
+              <circle cx="125" cy="192" r="7" fill="#2b3138"/></g>
+            <g><circle cx="476" cy="192" r="44" fill="#0d1015"/><circle cx="476" cy="192" r="40" fill="none" stroke="#23282f" stroke-width="3"/>
+              <g class="rimspin"><circle cx="476" cy="192" r="28" fill="#2a3038"/><circle cx="476" cy="192" r="26" fill="none" stroke="url(#rim)" stroke-width="4"/>
+              <g stroke="url(#rim)" stroke-width="9" stroke-linecap="round"><path d="M476 192 L476.0 167.0 M476 192 L499.8 184.3 M476 192 L490.7 212.2 M476 192 L461.3 212.2 M476 192 L452.2 184.3"/></g><circle cx="476" cy="192" r="9" fill="url(#rim)"/></g>
+              <circle cx="476" cy="192" r="7" fill="#2b3138"/></g>
+            <!-- brillo -->
+            <path d="M118 110 C220 94 380 90 502 104" stroke="#fff" stroke-opacity=".45" stroke-width="3" fill="none"/>
+          </svg>
+        </div>
+
+        <div class="colors" id="colors"></div>
+
+        <div class="wxbox">
+          <div class="wx"><div class="t" id="wxT">--°</div></div>
+          <div class="wxd"><b id="wxDesc">Cargando clima…</b><span id="wxFeel"></span></div>
+          <div class="wxs"><span>↑ <b id="wxMax">--</b>°</span><span>💧 <b id="wxHum">--</b>%</span><span>↓ <b id="wxMin">--</b>°</span><span>≋ <b id="wxWind">--</b> km/h</span></div>
+        </div>
+      </article>
+
+      <div class="mid">
+        <article class="card glass map" data-tile="nav">
+          <svg class="mapbg" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice">
+            <g stroke="rgba(255,255,255,.18)" stroke-width="6" fill="none"><path d="M0 40h300M0 115h300M60 0v160M170 0v160M250 0v160"/></g>
+            <g stroke="rgba(255,255,255,.1)" stroke-width="3" fill="none"><path d="M0 80h300M110 0v160M210 0v160M0 0l300 160"/></g>
+            <path d="M0 62h300" stroke="rgba(255,255,255,.55)" stroke-width="8"/>
+            <path d="M60 160 C90 120 150 110 170 62 S240 20 300 10" stroke="var(--c1)" stroke-width="5" fill="none"/>
+            <circle cx="170" cy="62" r="7" fill="var(--c1)" stroke="#fff" stroke-width="3"/>
+            <g fill="#ff5c8a"><circle cx="40" cy="58" r="4"/><circle cx="235" cy="60" r="4"/><circle cx="120" cy="25" r="4"/></g>
+          </svg>
+          <div class="lbl"><div class="c"><svg viewBox="0 0 24 24"><path d="M12 2 4.5 20.3l.7.7L12 18l6.8 3 .7-.7z"/></svg></div><div><b>Navegación</b><span>¿A dónde vamos?</span></div></div>
+        </article>
+        <article class="card glass music">
+          <div class="cover" data-tile="music"><div class="eq"><i></i><i></i><i></i><i></i></div><svg viewBox="0 0 24 24"><path d="M12 3v10.6A4 4 0 1 0 14 17V7h4V3z"/></svg></div>
+          <div class="song" data-tile="music"><b>Música</b><span>Toca para abrir</span></div>
+          <div class="bar"></div>
+          <div class="ctr">
+            <button data-media="prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
+            <button class="p" data-media="play" aria-label="Reproducir"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+            <button data-media="next" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zM16 6h2v12h-2z"/></svg></button>
+          </div>
+        </article>
+      </div>
+
+      <div class="quick">
+        <article class="card glass q" data-tile="phone"><div class="qi" style="background:linear-gradient(135deg,#34d27b,#139c55)"><svg viewBox="0 0 24 24"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div><div><b>Teléfono</b><span>Bluetooth</span></div></article>
+        <article class="card glass q" data-tile="radio"><div class="qi" style="background:linear-gradient(135deg,#a07bff,#6a3fe0)"><svg viewBox="0 0 24 24"><path d="M12 10a2 2 0 0 0-1 3.7V22h2v-8.3A2 2 0 0 0 12 10zM7.8 7.8a6 6 0 0 0 0 8.4l1.4-1.4a4 4 0 0 1 0-5.6zm8.4 0-1.4 1.4a4 4 0 0 1 0 5.6l1.4 1.4a6 6 0 0 0 0-8.4zM5 5a10 10 0 0 0 0 14l1.4-1.4a8 8 0 0 1 0-11.2zm14 0-1.4 1.4a8 8 0 0 1 0 11.2L19 19A10 10 0 0 0 19 5z"/></svg></div><div><b>Radio FM</b><span>Sintonizar</span></div></article>
+        <article class="card glass q" data-tile="aauto"><div class="qi" style="background:linear-gradient(135deg,#3b9bff,#0f5fc8)"><svg viewBox="0 0 24 24"><path d="M12 2 3 21l9-5 9 5z"/></svg></div><div><b>Android Auto</b><span>Conectar</span></div></article>
+        <article class="card glass q" data-tile="carplay"><div class="qi" style="background:linear-gradient(135deg,#4be08a,#1aa457)"><svg viewBox="0 0 24 24"><path d="M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm6 4.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9zm-1 2.3 3.2 2.2L11 14.2z"/></svg></div><div><b>Apple CarPlay</b><span>Conectar</span></div></article>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="drawer" id="drawer">
+  <h2><span id="drawerTitle">Aplicaciones</span><button id="closeDrawer">Cerrar</button></h2>
+  <div class="apps" id="apps"></div>
+</div>
+<div class="drawer" id="fondoMenu">
+  <h2><span>Fondo y carro</span><button data-close>Cerrar</button></h2>
+  <div class="opts">
+    <button class="opt" id="optFoto">🖼️  Elegir foto de la galería o USB</button>
+    <button class="opt" id="optEscena">🌅  Atardecer en el mar (animado)</button>
+    <button class="opt" id="optCarro">🚙  Usar foto de MI carro (mejor PNG sin fondo)</button>
+    <button class="opt" id="optDibujo">✏️  Volver al dibujo de la Stepway</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Apps por defecto (toque largo en un botón para cambiarla) =====
+const DEFAULTS = {
+  nav:     ["com.waze","com.google.android.apps.maps"],
+  music:   ["com.spotify.music","com.google.android.apps.youtube.music","com.syu.music","com.android.music"],
+  phone:   ["com.syu.bt","com.android.bluetooth","com.fyt.bt","com.android.dialer"],
+  radio:   ["com.syu.radio","com.android.fmradio","com.fyt.radio","com.ts.radio"],
+  aauto:   ["com.zjinnova.zlink","cn.manstep.phonemirrorBox","com.google.android.projection.gearhead"],
+  carplay: ["com.zjinnova.zlink","cn.manstep.phonemirrorBox","com.syu.carlink"]
+};
+// ===== Colores de la Stepway (también pintan el tema) =====
+const COLORES = [
+  {n:"Plata",        c:"#b9c0c8"},
+  {n:"Rojo Fuego",   c:"#d3202a"},
+  {n:"Naranja Cobre",c:"#e8641b"},
+  {n:"Azul Cosmos",  c:"#1f4fb8"},
+  {n:"Gris Cassiopée",c:"#5d646d"},
+  {n:"Negro Nacarado",c:"#1c1e22"},
+  {n:"Blanco Glaciar",c:"#eef1f4"},
+  {n:"Verde",        c:"#2f8f5b"}
+];
+const A = window.Android;
+const $ = id => document.getElementById(id);
+const store = {get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2200)}
+
+// ===== Color =====
+function mix(hex,amt){ // amt>0 aclara, <0 oscurece
+  const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;
+  const t=amt>0?255:0,p=Math.abs(amt);
+  r=Math.round(r+(t-r)*p);g=Math.round(g+(t-g)*p);b=Math.round(b+(t-b)*p);
+  return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+function pintar(hex){
+  $("s1").setAttribute("stop-color",mix(hex,.35));
+  $("s2").setAttribute("stop-color",hex);
+  $("s3").setAttribute("stop-color",mix(hex,-.45));
+  // tema de acento: colores oscuros/claros usan un acento derivado legible
+  const lum=(()=>{const n=parseInt(hex.slice(1),16);return(.3*(n>>16)+.59*(n>>8&255)+.11*(n&255))/255})();
+  const base=lum<.2||lum>.6?"#2e8bff":hex;
+  document.documentElement.style.setProperty("--c1",mix(base,.25));
+  document.documentElement.style.setProperty("--c3",mix(base,-.25));
+  document.querySelectorAll("#colors button").forEach(b=>b.classList.toggle("sel",b.dataset.c===hex));
+  store.set("color",hex);
+}
+COLORES.forEach(o=>{const b=document.createElement("button");b.style.background=o.c;b.dataset.c=o.c;b.title=o.n;b.onclick=e=>{e.stopPropagation();pintar(o.c);toast(o.n);arrancar()};$("colors").appendChild(b)});
+pintar(store.get("color")||"#b9c0c8");
+
+// ===== Animación al tocar la camioneta =====
+function arrancar(){const s=$("stage");s.classList.remove("go");void s.offsetWidth;s.classList.add("go")}
+$("stage").addEventListener("click",arrancar);
+setTimeout(arrancar,600);
+
+// ===== Reloj =====
+const DIAS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function tick(){
+  const d=new Date(),h=d.getHours();
+  $("clock").textContent=String(h).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  $("date").textContent=`${DIAS[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+  $("saludo").textContent=(h<12?"Buenos días":h<19?"Buenas tardes":"Buenas noches")+" · ¿A dónde vamos hoy?";
+}
+tick();setInterval(tick,10000);
+
+// ===== Nombre =====
+const nombre=store.get("nombre")||"Kirvy";$("hola").textContent="Hola, "+nombre;
+$("hola").addEventListener("click",e=>{e.stopPropagation();const n=prompt("¿Cómo te llamas?",store.get("nombre")||"Kirvy");if(n){store.set("nombre",n.trim());$("hola").textContent="Hola, "+n.trim()}});
+
+// ===== Fondo =====
+function aplicarFondo(){
+  const f=store.get("fondo");
+  if(f){$("bgImg").src=f+"?t="+Date.now();$("bgImg").style.display="block";$("bgScene").style.display="none"}
+  else{$("bgImg").style.display="none";$("bgScene").style.display="block"}
+}
+aplicarFondo();
+window.onFondo=url=>{ if(url){store.set("fondo",url);aplicarFondo();toast("Fondo actualizado")} };
+$("optFoto").onclick=()=>{cerrar();if(A&&A.pickImage)A.pickImage("fondo");else toast("Disponible en el radio")};
+$("optCarro").onclick=()=>{cerrar();if(A&&A.pickImage)A.pickImage("carro");else toast("Disponible en el radio")};
+$("optDibujo").onclick=()=>{store.del("carro");aplicarCarro();cerrar();toast("Dibujo de la Stepway")};
+function aplicarCarro(){
+  const f=store.get("carro");
+  $("carFoto").style.display=f?"block":"none";$("car").style.display=f?"none":"block";
+  if(f)$("carFoto").src=f+"?t="+Date.now();
+}
+aplicarCarro();
+window.onCarro=url=>{ if(url){store.set("carro",url);aplicarCarro();toast("Foto del carro lista")} };
+$("optEscena").onclick=()=>{store.del("fondo");aplicarFondo();cerrar();toast("Atardecer en el mar")};
+
+// ===== Clima (Open-Meteo, sin llave) =====
+const WMO={0:"Despejado",1:"Mayormente despejado",2:"Parcialmente nublado",3:"Nublado",45:"Niebla",48:"Niebla",51:"Llovizna",53:"Llovizna",55:"Llovizna",61:"Lluvia ligera",63:"Lluvia",65:"Lluvia fuerte",80:"Chubascos",81:"Chubascos",82:"Chubascos fuertes",95:"Tormenta",96:"Tormenta",99:"Tormenta"};
+async function clima(){
+  let lat=19.43,lon=-99.13;
+  try{ if(A&&A.getLocation){const l=JSON.parse(A.getLocation()); if(l&&l.lat){lat=l.lat;lon=l.lon}} }catch(e){}
+  try{
+    const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1`;
+    const j=await (await fetch(u)).json(),c=j.current;
+    $("wxT").textContent=Math.round(c.temperature_2m)+"°";
+    $("extTemp").textContent=Math.round(c.temperature_2m)+"°C";
+    $("wxDesc").textContent=WMO[c.weather_code]||"—";
+    $("wxFeel").textContent="Sensación "+Math.round(c.apparent_temperature)+"°";
+    $("wxMax").textContent=Math.round(j.daily.temperature_2m_max[0]);
+    $("wxMin").textContent=Math.round(j.daily.temperature_2m_min[0]);
+    $("wxHum").textContent=c.relative_humidity_2m;
+    $("wxWind").textContent=Math.round(c.wind_speed_10m);
+  }catch(e){$("wxDesc").textContent="Sin internet";$("wxFeel").textContent="Conecta el hotspot"}
+}
+clima();setInterval(clima,20*60*1000);
+
+// ===== Abrir apps =====
+function abrir(tile){
+  if(!A){toast("Vista previa: abriría "+tile);return}
+  const saved=store.get("app_"+tile);
+  if(A.launchFirst(JSON.stringify(saved?[saved]:(DEFAULTS[tile]||[]))))return;
+  if(tile==="phone"&&A.openDialer){A.openDialer();return}
+  toast("Elige qué app abrir con este botón");elegir(tile);
+}
+function elegir(tile){
+  if(!A){toast("Vista previa");return}
+  $("drawerTitle").textContent="Elige app para este botón";
+  pintarApps(pkg=>{store.set("app_"+tile,pkg);toast("Guardado");cerrar();A.launch(pkg)});
+}
+function pintarApps(onPick){
+  const box=$("apps");box.innerHTML="";
+  let lista=[];try{lista=JSON.parse(A.listApps())}catch(e){}
+  lista.forEach(a=>{
+    const d=document.createElement("div");d.className="app1";
+    d.innerHTML=(a.icon?`<img src="data:image/png;base64,${a.icon}">`:`<div class="ph"></div>`)+`<div>${a.name.replace(/</g,"&lt;")}</div>`;
+    d.onclick=()=>onPick(a.pkg);box.appendChild(d);
+  });
+  $("drawer").classList.add("on");
+}
+function cerrar(){document.querySelectorAll(".drawer").forEach(d=>d.classList.remove("on"))}
+$("closeDrawer").onclick=cerrar;
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=cerrar);
+
+document.querySelectorAll("[data-tile]").forEach(el=>{
+  let t,largo=false;
+  el.addEventListener("touchstart",()=>{largo=false;t=setTimeout(()=>{largo=true;elegir(el.dataset.tile)},700)},{passive:true});
+  el.addEventListener("touchend",()=>clearTimeout(t));
+  el.addEventListener("touchmove",()=>clearTimeout(t),{passive:true});
+  el.addEventListener("click",e=>{e.stopPropagation();if(!largo)abrir(el.dataset.tile)});
+});
+document.querySelectorAll("[data-media]").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();A?A.media(b.dataset.media):toast("Vista previa")}));
+document.querySelector('[data-act="apps"]').onclick=()=>{if(!A){toast("Vista previa");return}$("drawerTitle").textContent="Aplicaciones";pintarApps(p=>{cerrar();A.launch(p)})};
+document.querySelector('[data-act="fondo"]').onclick=()=>$("fondoMenu").classList.add("on");
+document.querySelector('[data-act="settings"]').onclick=()=>A?A.openSettings():toast("Vista previa");
+document.querySelector('[data-act="home"]').onclick=cerrar;
+window.onBack=cerrar;
+</script>
+</body>
+</html>
